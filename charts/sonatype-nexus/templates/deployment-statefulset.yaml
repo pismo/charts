@@ -43,6 +43,9 @@ spec:
       labels:
         app: {{ template "nexus.name" . }}
         release: {{ .Release.Name }}
+        {{- if .Values.nexus.labels }}
+{{ toYaml .Values.nexus.labels | indent 8 }}
+        {{- end }}
     spec:
       {{- if .Values.deployment.initContainers }}
       initContainers:
@@ -77,6 +80,10 @@ spec:
             postStart:
               exec:
                 command: {{ .Values.deployment.postStart.command }}
+          {{- end }}
+          {{- with .Values.nexus.envFrom }}
+          envFrom: 
+            {{- toYaml . | nindent 12 }}
           {{- end }}
           env:
 {{ toYaml .Values.nexus.env | indent 12 }}
@@ -326,6 +333,9 @@ spec:
         {{- if .Values.deployment.additionalVolumes }}
 {{ toYaml .Values.deployment.additionalVolumes | indent 8 }}
         {{- end }}
+    {{- if .Values.nexus.terminationGracePeriodSeconds }}
+      terminationGracePeriodSeconds: {{ .Values.nexus.terminationGracePeriodSeconds }}
+    {{- end }}
     {{- with .Values.tolerations }}
       tolerations:
 {{ toYaml . | indent 8 }}
@@ -344,6 +354,9 @@ spec:
         name: {{ template "nexus.fullname" . }}-data
         labels:
 {{ include "nexus.labels" . | indent 10 }}
+          {{- if .Values.nexus.labels }}
+{{ toYaml .Values.nexus.labels | indent 10 }}
+          {{- end }}
         {{- if .Values.persistence.annotations }}
         annotations:
 {{ toYaml .Values.persistence.annotations | indent 10 }}
